@@ -1,9 +1,9 @@
+require('dotenv').config();
 require('module-alias/register')
 
+const config = require('@config')
 const app = require('@app')
 
-const port = process.env.PORT || 3000;
-
-app.listen(port, () => {
-    console.log(`Servidor rodando na porta ${port}`);
+app.listen(config.app.port, () => {
+    console.log(`Servidor rodando na porta ${config.app.port}`);
   });
