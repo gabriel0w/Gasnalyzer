@@ -1,6 +1,9 @@
 # Ignorar node_modules em qualquer diretório
 **/node_modules/
 
+# Ignorar .env em qualquer diretório
+**/.env/
+
 # Ignorar arquivos de build do frontend
 frontend/build/
 
