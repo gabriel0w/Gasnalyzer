@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const db = require('../config/database');
 
-const Sensor = sequelize.define('Sensor', {
+const Sensor = db.sequelize.define('Sensor', {
   id_sensor: {
     type: DataTypes.INTEGER,
     primaryKey: true,

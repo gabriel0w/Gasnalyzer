@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const db = require('../config/database');
 
-const Microcontrolador = sequelize.define('Microcontrolador', {
+const Microcontrolador = db.sequelize.define('Microcontrolador', {
   id_chip: {
     type: DataTypes.STRING,
     primaryKey: true,

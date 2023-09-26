@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const db = require('../config/database');
+const Sensor = require('./Sensor');
 
-const Dado = sequelize.define('Dado', {
+const Dado = db.sequelize.define('Dado', {
   Data_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
