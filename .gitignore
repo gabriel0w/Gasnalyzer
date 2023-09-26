@@ -2,7 +2,7 @@
 **/node_modules/
 
 # Ignorar .env em qualquer diretório
-**/.env/
+*.env
 
 # Ignorar arquivos de build do frontend
 frontend/build/
