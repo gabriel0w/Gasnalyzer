@@ -1,6 +1,6 @@
-const mqtt = require('mqtt');
-const mqttConfig = require('../config/mqtt-config'); // Importe as configurações MQTT
-const MessageHandler = require('./sensor-message-service');
+const mqtt = require("mqtt");
+const mqttConfig = require("../config/mqtt"); // Importe as configurações MQTT
+const MessageHandler = require("./sensor-message-service");
 
 class MqttService {
   constructor() {
@@ -9,35 +9,43 @@ class MqttService {
 
   connect() {
     const options = {
-      clientId: mqttConfig.clientId,
+      host: mqttConfig.host,
+      port: mqttConfig.port,
+      protocol: mqttConfig.protocol,
       username: mqttConfig.username,
       password: mqttConfig.password,
     };
 
-    this.client = mqtt.connect(mqttConfig.brokerUrl, options);
+    this.client = mqtt.connect(options);
 
     // Evento de conexão bem-sucedida
-    this.client.on('connect', () => {
-      console.log('Conexão MQTT estabelecida');
-      this.client.subscribe('SENSOR_DATA')
+    this.client.on("connect", () => {
+      console.log("Conexão MQTT estabelecida");
+      this.client.subscribe("SENSOR_DATA");
     });
 
     // Evento de desconexão
-    this.client.on('close', () => {
-      console.log('Conexão MQTT fechada');
+    this.client.on("close", () => {
+      console.log("Conexão MQTT fechada");
+
+      // Tentar reconectar após um atraso (por exemplo, 5 segundos)
+      setTimeout(() => {
+        console.log("Tentando reconectar...");
+        this.connect(); // Tente reconectar
+      }, 5000); // Ajuste o tempo de atraso conforme necessário
     });
 
     // Evento de erro
-    this.client.on('error', (error) => {
-      console.error('Erro na conexão MQTT:', error);
+    this.client.on("error", (error) => {
+      console.error("Erro na conexão MQTT:", error);
     });
 
     // Evento de mensagem recebida
-    this.client.on('message', (topic, message) => {
+    this.client.on("message", (topic, message) => {
       console.log(`Mensagem recebida em ${topic}: ${message.toString()}`);
       // Verifique se o tópico corresponde ao que você espera
-      if (topic === 'SENSOR_DATA') {
-        MessageHandler.handleSensorData()
+      if (topic === "SENSOR_DATA") {
+        MessageHandler.handleSensorData();
       }
     });
   }
@@ -49,15 +57,6 @@ class MqttService {
   // Método para publicar mensagens
   publish(topic, message) {
     this.client.publish(topic, message);
-  }
-
-  // Método para processar mensagens recebidas
-  processReceivedMessage(message) {
-    const parts = message.split(';');
-    if (parts.length >= 2) {
-      const timestamp = new Date().toISOString();
-      const content = parts[0].trim();
-    }
   }
 
   // Outros métodos para desconectar, etc., se necessário
