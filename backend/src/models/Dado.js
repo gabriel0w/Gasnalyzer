@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/database');
 const Sensor = require('./Sensor');
+const Microcontrolador = require('./MicroControlador')
 
 const Dado = db.sequelize.define('Dado', {
   Data_id: {
@@ -20,8 +21,12 @@ const Dado = db.sequelize.define('Dado', {
   monoxido_carbono: {
     type: DataTypes.FLOAT,
   },
+  fk_id_microcontrolador: {
+    type: DataTypes.STRING,
+  },
 });
 
 Dado.belongsTo(Sensor, { foreignKey: 'fk_id_sensor' });
+Dado.belongsTo(Microcontrolador, { foreignKey: 'fk_id_microcontrolador' });
 
 module.exports = Dado;
