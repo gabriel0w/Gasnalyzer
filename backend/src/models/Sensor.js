@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/database');
+const Microcontrolador = require('./MicroControlador')
 
 const Sensor = db.sequelize.define('Sensor', {
   id_sensor: {
@@ -24,5 +25,7 @@ const Sensor = db.sequelize.define('Sensor', {
     allowNull: false,
   },
 });
+
+Sensor.belongsTo(Microcontrolador, { foreignKey: 'fk_id_microcontrolador' });
 
 module.exports = Sensor;
