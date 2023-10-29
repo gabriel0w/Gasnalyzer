@@ -1,11 +1,13 @@
-const { Sequelize } = require('sequelize');
+const { Sequelize } = require("sequelize");
+require("dotenv").config(); // Carrega as variáveis de ambiente do arquivo .env
 
-const sequelize = new Sequelize('database_name', 'username', 'password', {
-  dialect: 'mysql', // Por exemplo, 'mysql', 'postgres', 'sqlite'
-  // Outras opções de configuração, como host, port, etc.
-});
-
-module.exports = {
-    Sequelize,
-    sequelize
-}
+export const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASS,
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: "mysql",
+  }
+);
