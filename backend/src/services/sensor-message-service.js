@@ -1,4 +1,8 @@
-const { Dado } = require("../models/Dado"); // Importe o modelo do banco de dados (ajuste o caminho conforme necessário)
+const { Dado } = require("../models/Dado");
+const { MicroControlador } = require("../models/MicroControlador");
+const { Sensor } = require("../models/Sensor");
+const SensorRepository = require('../repository/SensorRepository');
+const io = require('./containerservice').resolve('io');
 
 class MessageHandler {
   static async handleSensorData(topic, message) {
@@ -10,12 +14,14 @@ class MessageHandler {
 
       if (parts.length >= 4) {
         const timestamp = new Date().toISOString();
+        const repository = new SensorRepository(Dado, Sensor, MicroControlador); // Adicione outros modelos conforme necessário
+        const data = await repository.saveData(parts, timestamp);
 
-        // Salvar a mensagem no banco de dados
+        io.emit('newData', data);
+        console.log("Mensagem salva no banco de dados e emitida via WebSocket com sucesso.");
       }
-      console.log("Mensagem salva no banco de dados com sucesso.");
     } catch (error) {
-      console.error("Erro ao lidar com a mensagem:", error);
+      console.error("Erro ao lidar com a mensagem:", error.message);
     }
   }
 }

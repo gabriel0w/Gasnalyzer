@@ -1,16 +1,10 @@
 require("dotenv").config();
 require("module-alias/register");
 
-const config = require("@config");
-const app = require("@app");
-const MQTTService = require("./src/services/mqtt-service");
+require("./src/initializers/expressInitializer");  // Inicialização do Express
+const io = require("./src/initializers/socketInitializer");   // Inicialização do Socket.io
 
-app.listen(config.app.port, () => {
-  console.log(`Servidor rodando na porta ${config.app.port}`);
-});
+const containerService = require('./src/services/containerservice');
+containerService.registerDependency('io', io);
 
-const mqttClient = new MQTTService();
-
-mqttClient.connect();
-
-mqttClient.subscribe("SENSOR_DATA");
+require("./src/initializers/mqttInitializer");     // Inicialização do MQTT

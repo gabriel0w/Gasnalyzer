@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/database');
 const Sensor = require('./Sensor');
+const bcrypt = require('bcryptjs');
 
 const Usuario = db.sequelize.define('Usuario', {
   id_user: {
@@ -21,6 +22,13 @@ const Usuario = db.sequelize.define('Usuario', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+});
+
+Usuario.beforeCreate(async (usuario) => {
+  if (usuario.senha) {
+    const salt = await bcrypt.genSalt(10);
+    usuario.senha = await bcrypt.hash(usuario.senha, salt);
+  }
 });
 
 // Defina a relação entre Usuario e Sensor
