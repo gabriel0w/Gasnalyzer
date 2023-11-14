@@ -1,7 +1,7 @@
 const { Dado } = require("../models/Dado");
 const { MicroControlador } = require("../models/MicroControlador");
 const { Sensor } = require("../models/Sensor");
-const SensorRepository = require('../repository/SensorRepository');
+const SensorRepository = require('../repository/DataRepository');
 const io = require('./containerservice').resolve('io');
 
 class MessageHandler {
