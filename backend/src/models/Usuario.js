@@ -22,6 +22,14 @@ const Usuario = db.sequelize.define('Usuario', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  resetToken: {
+    type: DataTypes.STRING,
+    allowNull: true, // O campo pode ser nulo porque nem todos os usuários terão um token de redefinição o tempo todo
+  },
+  resetTokenExpiration: {
+    type: DataTypes.DATE,
+    allowNull: true, // Este campo também pode ser nulo e armazenará a data e hora de expiração do token
+  },
 });
 
 Usuario.beforeCreate(async (usuario) => {
@@ -37,4 +45,4 @@ Usuario.belongsToMany(Sensor, {
   foreignKey: 'id_user',
 });
 
-module.exports = Usuario;
+module.exports = { User: Usuario };
