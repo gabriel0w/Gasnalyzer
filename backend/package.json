@@ -11,12 +11,14 @@
   "dependencies": {
     "awilix": "^9.0.0",
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "module-alias": "^2.2.3",
     "mqtt": "^5.0.5",
     "mysql2": "^3.6.1",
+    "node-cron": "^3.0.2",
     "nodemailer": "^6.9.7",
     "sequelize": "^6.33.0",
     "socket.io": "^4.7.2"
@@ -26,5 +28,9 @@
     "@app": "src/app.js",
     "@config": "src/config",
     "@controller": "src/controller"
+  },
+  "devDependencies": {
+    "sequelize-auto-migrations": "^1.0.3",
+    "sequelize-cli": "^6.6.1"
   }
 }
