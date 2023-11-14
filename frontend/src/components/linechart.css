@@ -1,0 +1,16 @@
+#line-chart, #real-time-chart { /* Replace with the actual class or ID */
+    overflow: visible !important; /* Use !important to ensure override */
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+
+  @media screen and (max-width: 1920px) {
+    .chart-container {
+      flex-direction: column !important;
+    }
+
+    .chart-item {
+      width: 100%;
+      /* Se necessário, outros estilos para ajustar os gráficos/dados para a visualização em tela inteira */
+    }
+  }
