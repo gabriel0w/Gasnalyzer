@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { TextField, Button, Grid, Container, Typography } from '@mui/material';
 import { styled } from '@mui/system';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios'
 
 const StyledContainer = styled(Container)({
   marginTop: '50px',
@@ -14,9 +16,35 @@ function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // Aqui você pode adicionar a lógica de autenticação ou chamada de API.
-    console.log('Logging in with email:', email);
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('/api/login', {
+        email,
+        password
+      });
+
+      // O Axios já processa a resposta JSON, então você pode acessar diretamente
+      saveToken(response.data.token);
+
+      // Navegue para outra página após o login, se necessário
+      navigate('/charts');
+    } catch (error) {
+      console.error('Login failed:', error.response?.data || error.message);
+    }
+  };
+
+  const saveToken = (token) => {
+    localStorage.setItem('token', token);
+  };
+
+  const goToRegister = () => {
+    navigate('/register');  // Navega para a página de registro
+  };
+
+  const goToForgotPassword = () => {
+    navigate('/forgot-password'); // Navega para a página "Esqueci minha senha"
   };
 
   return (
@@ -57,9 +85,19 @@ function LoginPage() {
             fullWidth
             variant="outlined"
             color="primary"
-            //onClick={handleRegister}
+            onClick={goToRegister}
           >
             Cadastre-se
+          </Button>
+        </Grid>
+        <Grid item xs={12}>
+          <Button
+            fullWidth
+            variant="outlined"
+            color="secondary"
+            onClick={goToForgotPassword}  // Adicione o evento aqui
+          >
+            Esqueceu a senha?
           </Button>
         </Grid>
       </Grid>
