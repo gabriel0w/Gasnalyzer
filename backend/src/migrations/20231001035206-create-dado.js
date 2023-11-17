@@ -8,23 +8,14 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
-      temperatura: {
-        type: Sequelize.FLOAT,
-      },
-      umidade: {
-        type: Sequelize.FLOAT,
-      },
-      gas_inflamavel: {
-        type: Sequelize.FLOAT,
-      },
-      monoxido_carbono: {
+      unidade: {
         type: Sequelize.FLOAT,
       },
       fk_id_sensor: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'Sensors',
-          key: 'id_sensor', // Verifique se a coluna correta está sendo referenciada aqui
+          model: 'Sensors', // Certifique-se de que o nome da tabela esteja correto
+          key: 'id_sensor',
         },
         allowNull: false,
       },

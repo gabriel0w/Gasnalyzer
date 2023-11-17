@@ -8,16 +8,7 @@ const Dado = db.sequelize.define('Dado', {
     primaryKey: true,
     autoIncrement: true,
   },
-  temperatura: {
-    type: DataTypes.FLOAT,
-  },
-  umidade: {
-    type: DataTypes.FLOAT,
-  },
-  gas_inflamavel: {
-    type: DataTypes.FLOAT,
-  },
-  monoxido_carbono: {
+  unidade: {
     type: DataTypes.FLOAT,
   },
 });
