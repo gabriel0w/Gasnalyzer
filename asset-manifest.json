@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/Gasnalyzer/static/css/main.991aa555.css",
+    "main.js": "/Gasnalyzer/static/js/main.1829802b.js",
+    "static/js/787.75a4528e.chunk.js": "/Gasnalyzer/static/js/787.75a4528e.chunk.js",
+    "index.html": "/Gasnalyzer/index.html",
+    "main.991aa555.css.map": "/Gasnalyzer/static/css/main.991aa555.css.map",
+    "main.1829802b.js.map": "/Gasnalyzer/static/js/main.1829802b.js.map",
+    "787.75a4528e.chunk.js.map": "/Gasnalyzer/static/js/787.75a4528e.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.991aa555.css",
+    "static/js/main.1829802b.js"
+  ]
+}
