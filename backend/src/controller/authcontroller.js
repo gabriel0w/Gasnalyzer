@@ -32,9 +32,6 @@ const login = async (req, res) => {
       return res.status(404).json({ message: 'Usuário não encontrado' });
     }
 
-    console.log(password);
-    console.log(user.senha);
-
     const isValidPassword = await bcrypt.compare(password, user.senha);
     console.log(isValidPassword)
     if (!isValidPassword) {
@@ -83,7 +80,9 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: 'Token inválido ou expirado' });
     }
 
-    await userRepository.resetPassword(user.id_user, newPassword);
+    const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    await userRepository.resetPassword(user.id_user, hashedPassword);
 
     res.send('Senha redefinida com sucesso!');
   } catch (error) {

@@ -1,20 +1,38 @@
-const DataRepository = require('../repository/DataRepository');
-const { Dado } = require("../models/Dado");
-const { Sensor } = require("../models/Sensor");
-const { MicroControlador } = require("../models/MicroControlador");
+const DataService = require('../services/dataservice');
 
-class dataController {
-  static async getDataBefore(req, res) {
+class DataController {
+
+  // Método para adicionar dados
+  async addData(req, res) {
     try {
-      const date = new Date(req.params.date);
-      const repository = new DataRepository(Dado, Sensor, MicroControlador);
+      await DataService.saveData(req.body.unidade, req.body.fk_id_sensor, req.body.timestamp);
+      res.status(201).send('Dado adicionado com sucesso.');
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
 
-      const data = await repository.getDataBeforeDate(date);
-      res.json(data);
+  // Método para obter a média mensal por sensor
+  async getMonthlyAverage(req, res) {
+    try {
+      const year = req.params.year;
+      const monthlyAverages = await DataService.getMonthlyAverageBySensor(year);
+      res.status(200).json(monthlyAverages);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
+  // Método para obter dados entre duas datas
+  async getDataBetweenDates(req, res) {
+    try {
+      const { startDate, endDate } = req.params;
+      const data = await DataService.getDataBetweenDates(startDate, endDate);
+      res.status(200).json(data);
     } catch (error) {
       res.status(500).send(error.message);
     }
   }
 }
 
-module.exports = dataController;
+module.exports = new DataController();
