@@ -9,7 +9,7 @@ import '@syncfusion/ej2-react-grids/styles/material.css';
 import '@syncfusion/ej2-navigations/styles/material.css';
 import socketIOClient from 'socket.io-client';
 
-const ENDPOINT = "http://localhost:3001";
+const ENDPOINT = `${process.env.REACT_APP_SOCKET}`;
 const SENSOR_NAMES = {
   1: 'Temperatura',
   3: 'Umidade',
