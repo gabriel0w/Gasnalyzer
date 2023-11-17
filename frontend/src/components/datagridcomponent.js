@@ -10,8 +10,7 @@ import {
   Resize,
 } from "@syncfusion/ej2-react-grids";
 import { DateRangePickerComponent } from "@syncfusion/ej2-react-calendars";
-// Importando Axios
-// import axios from 'axios';
+import axios from "axios";
 import "@syncfusion/ej2-base/styles/material.css";
 import "@syncfusion/ej2-buttons/styles/material.css";
 import "@syncfusion/ej2-calendars/styles/material.css";
@@ -25,39 +24,45 @@ class SensorDataGrid extends Component {
     super(props);
 
     this.state = {
-      data: [], // inicializando como vazio
+      data: [],
       dateRange: [new Date(), new Date()],
     };
   }
 
-  // Função para lidar com a mudança de intervalo de datas
   onDateRangeChange = (args) => {
+    debugger;
     const startDate = args.value[0];
     const endDate = args.value[1];
-
-    // Chamar função para buscar dados quando o backend estiver pronto
-    // this.fetchNewData(startDate, endDate);
+    this.fetchNewData(startDate, endDate);
   };
 
-  // Função esquematizada para buscar novos dados do backend
   fetchNewData = async (startDate, endDate) => {
-    // URL do seu backend
-    const apiUrl = "YOUR_BACKEND_ENDPOINT";
+    const getToken = () => localStorage.getItem("token");
 
-    // Descomente o trecho abaixo e ajuste conforme necessário quando o backend estiver pronto
-    /*
+    const config = {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    };
+
+    const apiUrl = `${process.env.REACT_APP_API_URL}/api/data/between-dates/${startDate.toISOString()}/${endDate.toISOString()}`;
     try {
-      const response = await axios.get(apiUrl, {
-        params: {
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString()
-        }
-      });
-      this.setState({ data: response.data });
+      const response = await axios.get(apiUrl, config);
+      // Mapeamento dos dados recebidos para o formato da tabela
+      const mappedData = response.data.map((item) => ({
+        Data_id: item.Data_id,
+        Microcontrolador:
+          item.Sensor.Microcontrolador.tipo_chip +
+          " - " +
+          item.Sensor.Microcontrolador.Localizacao,
+        Sensor: item.Sensor.tipo,
+        Medida: item.unidade,
+        Data: item.createdAt,
+      }));
+      this.setState({ data: mappedData });
     } catch (error) {
-      console.error('Houve um erro ao buscar os dados:', error);
+      console.error("Houve um erro ao buscar os dados:", error);
     }
-    */
   };
 
   render() {
@@ -77,42 +82,33 @@ class SensorDataGrid extends Component {
           allowFiltering={true}
           pageSettings={{ pageSize: 10 }}
           allowResize={true}
-          style = {{marginTop : '2rem'}}
+          style={{ marginTop: "2rem" }}
         >
           <ColumnsDirective>
             <ColumnDirective
-              field="microcontroller"
+              field="Microcontrolador"
               headerText="Microcontrolador"
               width="150"
               textAlign="Center"
             />
             <ColumnDirective
-              field="sensor"
+              field="Sensor"
               headerText="Sensor"
               width="150"
               textAlign="Center"
             />
             <ColumnDirective
-              field="max"
-              headerText="Máximo"
+              field="Medida"
+              headerText="Medida"
               width="100"
               textAlign="Center"
-              type="number"
             />
             <ColumnDirective
-              field="min"
-              headerText="Mínimo"
-              width="100"
-              textAlign="Center"
-              type="number"
-            />
-            <ColumnDirective
-              field="date"
+              field="Data"
               headerText="Data"
               width="200"
               textAlign="Center"
-              type="datetime"
-              format={{ type: "dateTime", format: "dd/MM/yyyy HH:mm:ss" }}
+              format={{ type: "dateTime" }}
             />
           </ColumnsDirective>
           <Inject services={[Page, Sort, Filter, Resize]} />

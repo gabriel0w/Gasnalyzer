@@ -29,7 +29,7 @@ function RegisterPage() {
     }
 
     // Configurações da requisição
-    const apiEndpoint = "http://localhost:3000/api/users";
+    const apiEndpoint = `${process.env.REACT_APP_API_URL}/api/users`;
     const userData = {
       email: email,
       senha: password,

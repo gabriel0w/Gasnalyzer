@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import socketIOClient from 'socket.io-client';
 import {
   ChartComponent,
   SeriesCollectionDirective,
@@ -9,43 +10,58 @@ import {
   Legend
 } from '@syncfusion/ej2-react-charts';
 
+const ENDPOINT = "http://localhost:3001";
+
 class RealTimeChart extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: [],
+      temperatura: [],
+      umidade: [],
+      gasInflamavel: [],
+      monoxidoDeCarbono: [],
     };
+  }
 
-    // Iniciar a atualização de dados em tempo real simulados
-    this.startMockDataUpdate();
+  componentDidMount() {
+    this.socket = socketIOClient(ENDPOINT);
+
+    this.socket.on('newData', (sensorData) => {
+      const newState = {};
+
+      sensorData.forEach(data => {
+        const { id, value } = data;
+        const timestamp = new Date();
+        const newDataPoint = { x: timestamp, y: value };
+
+        switch (id) {
+          case 1: // Substitua por 1 se SENSOR_IDS não estiver definido
+            newState.temperatura = [newDataPoint, ...this.state.temperatura.slice(0, 10)];
+            break;
+          case 3: // Substitua por 3
+            newState.umidade = [newDataPoint, ...this.state.umidade.slice(0, 10)];
+            break;
+          case 4: // Substitua por 4
+            newState.gasInflamavel = [newDataPoint, ...this.state.gasInflamavel.slice(0, 10)];
+            break;
+          case 2: // Substitua por 2
+            newState.monoxidoDeCarbono = [newDataPoint, ...this.state.monoxidoDeCarbono.slice(0, 10)];
+            break;
+          default:
+            break;
+        }
+      });
+
+      this.setState(newState);
+    });
   }
 
   componentWillUnmount() {
-    // Parar a atualização de dados simulados quando o componente for desmontado
-    clearInterval(this.mockDataInterval);
-  }
-
-  startMockDataUpdate() {
-    // Simulação de dados em tempo real a cada segundo
-    this.mockDataInterval = setInterval(() => {
-      const timestamp = new Date();
-      const newDataPoint = {
-        x: timestamp,
-        temperature: Math.floor(Math.random() * 100),
-        humidity: Math.floor(Math.random() * 100),
-        flammableGas: Math.floor(Math.random() * 100),
-        carbonMonoxide: Math.floor(Math.random() * 100),
-      };
-
-      // Adicionar a nova atualização ao início do array e manter apenas as últimas 30 atualizações
-      this.setState((prevState) => ({
-        data: [newDataPoint, ...prevState.data.slice(0, 10)],
-      }));
-    }, 1000);
+    this.socket.disconnect();
   }
 
   render() {
-    const { data } = this.state;
+    const { temperatura, umidade, gasInflamavel, monoxidoDeCarbono } = this.state;
 
     return (
       <div>
@@ -59,42 +75,38 @@ class RealTimeChart extends Component {
         >
           <Inject services={[LineSeries, DateTime, Legend]} />
           <SeriesCollectionDirective>
-            {/* Temperatura */}
             <SeriesDirective
-              dataSource={data}
+              dataSource={temperatura}
               name="Temperatura"
               xName="x"
-              yName="temperature"
+              yName="y"
               type="Line"
               marker={{ visible: true }}
               fill="red"
             />
-            {/* Umidade */}
             <SeriesDirective
-              dataSource={data}
+              dataSource={umidade}
               name="Umidade"
               xName="x"
-              yName="humidity"
+              yName="y"
               type="Line"
               marker={{ visible: true }}
               fill="blue"
             />
-            {/* Gás Inflamável */}
             <SeriesDirective
-              dataSource={data}
+              dataSource={gasInflamavel}
               name="Gás Inflamável"
               xName="x"
-              yName="flammableGas"
+              yName="y"
               type="Line"
               marker={{ visible: true }}
               fill="green"
             />
-            {/* Monóxido de Carbono */}
             <SeriesDirective
-              dataSource={data}
+              dataSource={monoxidoDeCarbono}
               name="Monóxido de Carbono"
               xName="x"
-              yName="carbonMonoxide"
+              yName="y"
               type="Line"
               marker={{ visible: true }}
               fill="purple"

@@ -1,62 +1,51 @@
-import React, { useState } from 'react';
-import { TextField, Button, Grid, Container, Typography } from '@mui/material';
-import { styled } from '@mui/system';
+import React, { useState } from "react";
+import { TextField, Button, Container, Typography } from "@mui/material";
+import { styled } from "@mui/system";
+import axios from "axios";
 
 const StyledContainer = styled(Container)({
-  marginTop: '50px',
+  marginTop: "50px",
 });
 
 const StyledTextField = styled(TextField)({
-  marginBottom: '20px',
+  marginBottom: "20px",
 });
 
-function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+function ResetPasswordPage() {
+  const [email, setEmail] = useState("");
 
-  const handleResetPassword = () => {
-    // Aqui você pode adicionar a lógica de redefinição de senha ou chamada de API.
-    console.log('Reset password for email:', email);
+  const handleResetPassword = async () => {
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/request-reset-password`, { email });
+      alert('E-mail de redefinição enviado com sucesso! Verifique sua caixa de entrada.');
+    } catch (error) {
+      console.error('Erro ao solicitar redefinição de senha:', error);
+      alert('Erro ao enviar a solicitação de redefinição de senha.');
+    }
   };
 
   return (
     <StyledContainer maxWidth="xs">
-      <Typography variant="h4" align="center">Esqueci minha senha</Typography>
-      <Typography variant="body1" align="center" style={{ marginBottom: '20px' }}>
-        Insira seu e-mail e enviaremos um link para redefinir sua senha.
+      <Typography variant="h5" align="center">
+        Redefinição de Senha
       </Typography>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <StyledTextField
-            fullWidth
-            label="Email"
-            variant="outlined"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            onClick={handleResetPassword}
-          >
-            Enviar link de redefinição
-          </Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Button
-            fullWidth
-            variant="outlined"
-            color="primary"
-            //onClick={handleLogin}
-          >
-            Voltar para o login
-          </Button>
-        </Grid>
-      </Grid>
+      <StyledTextField
+        fullWidth
+        label="Email"
+        variant="outlined"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <Button
+        fullWidth
+        variant="contained"
+        color="primary"
+        onClick={handleResetPassword}
+      >
+        Enviar E-mail de Redefinição
+      </Button>
     </StyledContainer>
   );
 }
 
-export default ForgotPasswordPage;
+export default ResetPasswordPage;

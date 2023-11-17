@@ -17,12 +17,12 @@ function ResetPasswordPage() {
     }
 
     try {
-      const response = await axios.post('http://your-backend-url/reset-password', {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/reset-password`, {
         resetToken,
         newPassword
       });
 
-      setMessage(response.data);
+      setMessage(response.data.message || 'Senha redefinida com sucesso!');
 
       // Caso de sucesso: Redireciona para a página de login após 3 segundos.
       if(response.status === 200) {
@@ -32,7 +32,7 @@ function ResetPasswordPage() {
       }
 
     } catch (error) {
-      setMessage('Erro ao redefinir senha');
+      setMessage(error.response?.data.message || 'Erro ao redefinir senha');
     }
   };
 

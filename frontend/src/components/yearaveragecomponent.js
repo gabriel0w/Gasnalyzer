@@ -1,110 +1,81 @@
-import React from "react";
+import React, { Component } from "react";
+import axios from "axios";
 import {
   ChartComponent,
   SeriesCollectionDirective,
   SeriesDirective,
   LineSeries,
-  DateTime,
+  Category,
   Inject,
   Legend,
 } from "@syncfusion/ej2-react-charts";
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
-class LinearChart extends React.Component {
+class LinearChart extends Component {
   constructor(props) {
     super(props);
     this.state = {
       selectedYear: new Date().getFullYear(),
-      temperatureData: [
-        { x: new Date(2023, 0, 1), y: Math.floor(Math.random() * 100) }, // Janeiro
-        { x: new Date(2023, 1, 1), y: Math.floor(Math.random() * 100) }, // Fevereiro
-        { x: new Date(2023, 2, 1), y: Math.floor(Math.random() * 100) }, // Março
-        { x: new Date(2023, 3, 1), y: Math.floor(Math.random() * 100) }, // Abril
-        { x: new Date(2023, 4, 1), y: Math.floor(Math.random() * 100) }, // Maio
-        { x: new Date(2023, 5, 1), y: Math.floor(Math.random() * 100) }, // Junho
-        { x: new Date(2023, 6, 1), y: Math.floor(Math.random() * 100) }, // Julho
-        { x: new Date(2023, 7, 1), y: Math.floor(Math.random() * 100) }, // Agosto
-        { x: new Date(2023, 8, 1), y: Math.floor(Math.random() * 100) }, // Setembro
-        { x: new Date(2023, 9, 1), y: Math.floor(Math.random() * 100) }, // Outubro
-        { x: new Date(2023, 10, 1), y: Math.floor(Math.random() * 100) }, // Novembro
-        { x: new Date(2023, 11, 1), y: Math.floor(Math.random() * 100) }, // Dezembro],
-      ],
-      humidityData: [
-        { x: new Date(2023, 0, 1), y: Math.floor(Math.random() * 100) }, // Janeiro
-        { x: new Date(2023, 1, 1), y: Math.floor(Math.random() * 100) }, // Fevereiro
-        { x: new Date(2023, 2, 1), y: Math.floor(Math.random() * 100) }, // Março
-        { x: new Date(2023, 3, 1), y: Math.floor(Math.random() * 100) }, // Abril
-        { x: new Date(2023, 4, 1), y: Math.floor(Math.random() * 100) }, // Maio
-        { x: new Date(2023, 5, 1), y: Math.floor(Math.random() * 100) }, // Junho
-        { x: new Date(2023, 6, 1), y: Math.floor(Math.random() * 100) }, // Julho
-        { x: new Date(2023, 7, 1), y: Math.floor(Math.random() * 100) }, // Agosto
-        { x: new Date(2023, 8, 1), y: Math.floor(Math.random() * 100) }, // Setembro
-        { x: new Date(2023, 9, 1), y: Math.floor(Math.random() * 100) }, // Outubro
-        { x: new Date(2023, 10, 1), y: Math.floor(Math.random() * 100) }, // Novembro
-        { x: new Date(2023, 11, 1), y: Math.floor(Math.random() * 100) }, // Dezembro],
-      ],
-      flammableGasData: [
-        { x: new Date(2023, 0, 1), y: Math.floor(Math.random() * 100) }, // Janeiro
-        { x: new Date(2023, 1, 1), y: Math.floor(Math.random() * 100) }, // Fevereiro
-        { x: new Date(2023, 2, 1), y: Math.floor(Math.random() * 100) }, // Março
-        { x: new Date(2023, 3, 1), y: Math.floor(Math.random() * 100) }, // Abril
-        { x: new Date(2023, 4, 1), y: Math.floor(Math.random() * 100) }, // Maio
-        { x: new Date(2023, 5, 1), y: Math.floor(Math.random() * 100) }, // Junho
-        { x: new Date(2023, 6, 1), y: Math.floor(Math.random() * 100) }, // Julho
-        { x: new Date(2023, 7, 1), y: Math.floor(Math.random() * 100) }, // Agosto
-        { x: new Date(2023, 8, 1), y: Math.floor(Math.random() * 100) }, // Setembro
-        { x: new Date(2023, 9, 1), y: Math.floor(Math.random() * 100) }, // Outubro
-        { x: new Date(2023, 10, 1), y: Math.floor(Math.random() * 100) }, // Novembro
-        { x: new Date(2023, 11, 1), y: Math.floor(Math.random() * 100) }, // Dezembro],
-      ],
-      carbonMonoxideData: [
-        { x: new Date(2023, 0, 1), y: Math.floor(Math.random() * 100) }, // Janeiro
-        { x: new Date(2023, 1, 1), y: Math.floor(Math.random() * 100) }, // Fevereiro
-        { x: new Date(2023, 2, 1), y: Math.floor(Math.random() * 100) }, // Março
-        { x: new Date(2023, 3, 1), y: Math.floor(Math.random() * 100) }, // Abril
-        { x: new Date(2023, 4, 1), y: Math.floor(Math.random() * 100) }, // Maio
-        { x: new Date(2023, 5, 1), y: Math.floor(Math.random() * 100) }, // Junho
-        { x: new Date(2023, 6, 1), y: Math.floor(Math.random() * 100) }, // Julho
-        { x: new Date(2023, 7, 1), y: Math.floor(Math.random() * 100) }, // Agosto
-        { x: new Date(2023, 8, 1), y: Math.floor(Math.random() * 100) }, // Setembro
-        { x: new Date(2023, 9, 1), y: Math.floor(Math.random() * 100) }, // Outubro
-        { x: new Date(2023, 10, 1), y: Math.floor(Math.random() * 100) }, // Novembro
-        { x: new Date(2023, 11, 1), y: Math.floor(Math.random() * 100) }, // Dezembro],
-      ],
+      sensorData: {},
     };
   }
 
-  // fetchDataForYear = async (year) => {
-  //   try {
-  //     // Substitua esta URL pela URL real do seu backend
-  //     const response = await axios.get(`https://your-backend.com/data?year=${year}`);
-  //     // Assumindo que o backend retorna os dados no seguinte formato:
-  //     // { temperatureData: [...], humidityData: [...], flammableGasData: [...], carbonMonoxideData: [...] }
-  //     this.setState({
-  //       temperatureData: response.data.temperatureData,
-  //       humidityData: response.data.humidityData,
-  //       flammableGasData: response.data.flammableGasData,
-  //       carbonMonoxideData: response.data.carbonMonoxideData
-  //     });
-  //   } catch (error) {
-  //     console.error("Could not fetch data: ", error);
-  //     // Trate o erro conforme achar melhor
-  //   }
-  // };
+  componentDidMount() {
+    this.fetchDataForYear(this.state.selectedYear);
+  }
+
+  fetchDataForYear = async (year) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/data/monthly-average/${year}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const monthsInOrder = [
+        "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+        "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+      ];
+
+      const sortedData = {};
+      for (const sensorType in response.data) {
+        sortedData[sensorType] = {};
+
+        monthsInOrder.forEach((month) => {
+          sortedData[sensorType][month] = response.data[sensorType][month] || 0;
+        });
+      }
+
+      this.setState({ sensorData: sortedData });
+    } catch (error) {
+      console.error("Could not fetch data: ", error);
+    }
+  };
 
   handleChangeYear = (event) => {
     const newYear = event.target.value;
-    this.setState({ selectedYear: newYear });
-    //this.fetchDataForYear(newYear);
+    this.setState({ selectedYear: newYear }, () => {
+      this.fetchDataForYear(newYear);
+    });
   };
 
   render() {
-    const { selectedYear } = this.state;
-
+    const { selectedYear, sensorData } = this.state;
     const years = Array.from(
       { length: 5 },
       (_, index) => new Date().getFullYear() - index
     );
+
+    const seriesData = Object.entries(sensorData);
 
     return (
       <div>
@@ -116,8 +87,7 @@ class LinearChart extends React.Component {
             flexDirection: "column",
           }}
         >
-          <h1>Médial Mensal</h1>
-
+          <h1>Média Mensal por Sensor</h1>
           <p>Selecione o ano de interesse</p>
           <FormControl
             variant="outlined"
@@ -144,55 +114,25 @@ class LinearChart extends React.Component {
         <ChartComponent
           id="line-chart"
           primaryXAxis={{
-            valueType: "DateTime",
-            labelFormat: "MMM",
-            intervalType: "Months",
+            valueType: "Category",
+            labelPlacement: "OnTicks",
           }}
           primaryYAxis={{ labelFormat: "{value}" }}
           legendSettings={{ visible: true }}
         >
-          <Inject services={[LineSeries, DateTime, Legend]} />
+          <Inject services={[LineSeries, Category, Legend]} />
           <SeriesCollectionDirective>
-            {/* Temperatura */}
-            <SeriesDirective
-              dataSource={this.state.temperatureData}
-              name="Temperatura"
-              xName="x"
-              yName="y"
-              type="Line"
-              marker={{ visible: true }}
-              fill="red"
-            />
-            {/* Umidade */}
-            <SeriesDirective
-              dataSource={this.state.humidityData}
-              name="Umidade"
-              xName="x"
-              yName="y"
-              type="Line"
-              marker={{ visible: true }}
-              fill="blue"
-            />
-            {/* Gás Inflamável */}
-            <SeriesDirective
-              dataSource={this.state.flammableGasData}
-              name="Gás Inflamável"
-              xName="x"
-              yName="y"
-              type="Line"
-              marker={{ visible: true }}
-              fill="green"
-            />
-            {/* Monóxido de Carbono */}
-            <SeriesDirective
-              dataSource={this.state.carbonMonoxideData}
-              name="Monóxido de Carbono"
-              xName="x"
-              yName="y"
-              type="Line"
-              marker={{ visible: true }}
-              fill="purple"
-            />
+            {seriesData.map(([sensorType, dataPoints], index) => (
+              <SeriesDirective
+                key={sensorType}
+                dataSource={Object.entries(dataPoints)}
+                xName="0"
+                yName="1"
+                type="Line"
+                marker={{ visible: true }}
+                name={sensorType}
+              />
+            ))}
           </SeriesCollectionDirective>
         </ChartComponent>
       </div>

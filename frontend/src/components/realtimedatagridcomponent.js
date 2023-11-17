@@ -7,37 +7,53 @@ import '@syncfusion/ej2-dropdowns/styles/material.css';
 import '@syncfusion/ej2-inputs/styles/material.css';
 import '@syncfusion/ej2-react-grids/styles/material.css';
 import '@syncfusion/ej2-navigations/styles/material.css';
+import socketIOClient from 'socket.io-client';
+
+const ENDPOINT = "http://localhost:3001";
+const SENSOR_NAMES = {
+  1: 'Temperatura',
+  3: 'Umidade',
+  4: 'Gás Inflamável',
+  2: 'Monóxido de Carbono'
+};
 
 class RealTimeSensorDataGrid extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: [] // inicializando como vazio
+      data: [] // initializing as empty
     };
-    this.websocket = null;
+    this.socket = null;
   }
 
   componentDidMount() {
-    this.connectWebSocket();
-  }
+    this.socket = socketIOClient(ENDPOINT);
 
-  connectWebSocket = () => {
-    // Substitua 'YOUR_WEBSOCKET_ENDPOINT' pelo endpoint do seu WebSocket
-    this.websocket = new WebSocket('ws://localhost:3001');
+    this.socket.on('newData', (sensorData) => {
+      const formattedData = sensorData.map(data => ({
+        sensor: SENSOR_NAMES[data.id] || 'Desconhecido',
+        measure: data.value,
+        date: new Date().toLocaleString()
+      }));
 
-    this.websocket.onmessage = (event) => {
-      const newData = JSON.parse(event.data);
-      this.setState({ data: [...this.state.data, newData] });
-    };
+      // Use the functional form of setState to correctly update state based on previous state
+      this.setState((prevState) => {
+        const newData = [...prevState.data, ...formattedData];
+        console.log(newData);
+        return { data: newData };
+      }, () => {
+        this.forceUpdate(); // Força a renderização do componente
+      });
+    });
 
-    this.websocket.onerror = (error) => {
+    this.socket.onerror = (error) => {
       console.error('WebSocket Error:', error);
     };
-  };
+  }
 
   componentWillUnmount() {
-    if (this.websocket) {
-      this.websocket.close();
+    if (this.socket) {
+      this.socket.disconnect();
     }
   }
 
@@ -52,11 +68,9 @@ class RealTimeSensorDataGrid extends Component {
                        pageSettings={{ pageSize: 10 }}
                        allowResize={true}>
           <ColumnsDirective>
-            <ColumnDirective field='microcontroller' headerText='Microcontrolador' width='150' textAlign='Center'/>
             <ColumnDirective field='sensor' headerText='Sensor' width='150' textAlign='Center'/>
-            <ColumnDirective field='max' headerText='Máximo' width='100' textAlign='Center' type='number'/>
-            <ColumnDirective field='min' headerText='Mínimo' width='100' textAlign='Center' type='number'/>
-            <ColumnDirective field='date' headerText='Data' width='200' textAlign='Center' type='datetime' format={{type: 'dateTime', format: 'dd/MM/yyyy HH:mm:ss'}}/>
+            <ColumnDirective field='measure' headerText='Medida' width='100' textAlign='Center' type='number'/>
+            <ColumnDirective field='date' headerText='Data' width='200' textAlign='Center' format={{type: 'dateTime'}}/>
           </ColumnsDirective>
           <Inject services={[Page, Sort, Filter, Resize]} />
         </GridComponent>
