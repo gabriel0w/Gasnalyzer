@@ -43,6 +43,30 @@ class MqttService {
     });
   }
 
+  startPublishingRandomData() {
+    if (this.publishingInterval) {
+      return; // Já está publicando, então não faz nada
+    }
+
+    this.publishingInterval = setInterval(() => {
+      const randomData = [
+        (30.75 + Math.random() * 5).toFixed(2), // Valor próximo a 30.75
+        (54.40 + Math.random() * 5).toFixed(2), // Valor próximo a 54.40
+        (0.20 + Math.random() * 0.5).toFixed(2), // Valor próximo a 0.20
+        (8.46 + Math.random() * 2).toFixed(2)  // Valor próximo a 8.46
+      ].join(';');
+
+      this.publish("SENSOR_DATA", randomData);
+    }, 15000); // Gera e publica a cada 15 segundos
+  }
+
+  stopPublishingRandomData() {
+    if (this.publishingInterval) {
+      clearInterval(this.publishingInterval);
+      this.publishingInterval = null;
+    }
+  }
+
   subscribe(topic) {
     this.client.subscribe(topic);
   }

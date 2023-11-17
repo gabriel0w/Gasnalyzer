@@ -1,17 +1,22 @@
-const { Microcontrolador } = require('../models/MicroControlador');
+const microcontrollerRepository = require('../repository/MicroControllerRepository');
 
-class MicrocontroladorService {
-  async criarMicrocontrolador({ tipo_chip, Localizacao }) {
-    try {
-      const microcontrolador = await Microcontrolador.create({
-        tipo_chip,
-        Localizacao,
-      });
-      return microcontrolador;
-    } catch (error) {
-      throw error;
-    }
+class MicrocontrollerService {
+
+  async getAllMicrocontrollers() {
+    return await microcontrollerRepository.DBgetAllMicrocontrollers();
+  }
+
+  async getSensorsByMicrocontrollerId(microcontrollerId) {
+    return await microcontrollerRepository.DBgetSensorsByMicrocontrollerId(microcontrollerId);
+  }
+
+  async createMicrocontroller(data) {
+    return await microcontrollerRepository.DBCreateMicrocontroller(data);
+  }
+
+  async deleteMicrocontroller(microcontrollerId) {
+    return await microcontrollerRepository.DBDeleteMicrocontroller(microcontrollerId);
   }
 }
 
-module.exports = MicrocontroladorService;
+module.exports = new MicrocontrollerService();
