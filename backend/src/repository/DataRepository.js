@@ -1,178 +1,93 @@
-const { fn, col, literal, Op } = require('sequelize');
+const { fn, col, literal, Op, Sequelize  } = require('sequelize');
+const DadoModel = require("../models/Dado");
+const SensorModel = require("../models/Sensor");
+const MicrocontroladorModel = require("../models/MicroControlador");
 
 class DataRepository {
-  constructor(DadoModel, SensorModel, MicrocontroladorModel) {
-    this.DadoModel = DadoModel;
-    this.SensorModel = SensorModel;
-    this.MicrocontroladorModel = MicrocontroladorModel;
-  }
 
-  async getAnualAverageData(date) {
+  async saveData(unidade, fk_id_sensor, timestamp) {
     try {
-      // Buscar a média mensal dos dados anteriores a 'date'
-      const averages = await this.DadoModel.findAll({
-        where: {
-          timestamp: {
-            [Op.lt]: date // Filtra dados anteriores à data especificada
-          }
-        },
-        attributes: [
-          [fn('AVG', col('temperatura')), 'avgTemperatura'],
-          [fn('AVG', col('umidade')), 'avgUmidade'],
-          [fn('AVG', col('gas_inflamavel')), 'avgGasInflamavel'],
-          [fn('AVG', col('monoxido_carbono')), 'avgMonoxidoCarbono'],
-          // Use DATE_FORMAT para agrupar por ano e mês
-          [fn('DATE_FORMAT', col('timestamp'), '%Y-%m'), 'month']
-        ],
-        group: [literal('month')],
-        order: [[literal('month'), 'ASC']]
-      });
-
-      return averages;
-    } catch (error) {
-      console.error("Erro ao buscar a média mensal dos dados:", error);
-      throw error; // Propagar o erro
-    }
-  }
-
-  async getDailyAverageDataBeforeDate(date) {
-    try {
-      // Buscar a média diária dos dados anteriores à data especificada
-      const dailyAverages = await this.DadoModel.findAll({
-        where: {
-          timestamp: {
-            [Op.lt]: date // Menor que a data especificada
-          }
-        },
-        attributes: [
-          [fn('AVG', col('temperatura')), 'avgTemperatura'],
-          [fn('AVG', col('umidade')), 'avgUmidade'],
-          [fn('AVG', col('gas_inflamavel')), 'avgGasInflamavel'],
-          [fn('AVG', col('monoxido_carbono')), 'avgMonoxidoCarbono'],
-          // Use DATE_FORMAT para agrupar por dia
-          [fn('DATE_FORMAT', col('timestamp'), '%Y-%m-%d'), 'day']
-        ],
-        group: [literal('day')],
-        order: [[literal('day'), 'ASC']]
-      });
-
-      return dailyAverages;
-    } catch (error) {
-      console.error("Erro ao buscar a média diária dos dados:", error);
-      throw error; // Propagar o erro
-    }
-  }
-
-  static async saveData(parts, timestamp) {
-    try {
-      const convertedData = this.convertData(parts);
-
-      if (convertedData) {
-        // Os dados foram convertidos com sucesso, agora você pode criar um novo registro de Dado
-        await Dado.create({
-          temperatura: convertedData.temperatura,
-          umidade: convertedData.umidade,
-          gas_inflamavel: convertedData.gas_inflamavel,
-          monoxido_carbono: convertedData.monoxido_carbono,
-          fk_id_sensor: convertedData.sensorId, // Associe o dado ao sensor correspondente
+      if (!isNaN(unidade) && !isNaN(fk_id_sensor)) {
+        await DadoModel.create({
+          unidade: unidade,
+          fk_id_sensor: fk_id_sensor,
           timestamp: timestamp,
         });
-        console.log("Mensagem salva no banco de dados com sucesso.");
+        console.log("Dado salvo no banco de dados com sucesso.");
       } else {
-        console.error("Erro ao converter os dados ou valores inválidos.");
+        console.error("Erro ao salvar os dados: Valores inválidos.");
       }
     } catch (error) {
-      console.error("Erro ao lidar com a mensagem e salvar dados:", error);
+      console.error("Erro ao salvar dados:", error);
+      throw error;
     }
   }
 
-  async getDataBeforeDate(date) {
+  async getMonthlyAverageBySensor(year) {
     try {
-      // Buscar dados anteriores a 'date'
-      const dados = await this.DadoModel.findAll({
-        where: {
-          timestamp: {
-            [Sequelize.Op.lt]: date, // Op.lt significa "menor que"
+      const sensors = await SensorModel.findAll();
+      let monthlyAverages = {};
+
+      for (const sensor of sensors) {
+        if (!sensor.id_sensor) {
+          console.error("Sensor encontrado sem ID válido:", sensor);
+          continue;
+        }
+
+        const monthlyData = await DadoModel.findAll({
+          where: {
+            fk_id_sensor: sensor.id_sensor,
+            [Op.and]: [
+              Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('createdAt')), year)
+            ]
           },
+          attributes: [
+            [Sequelize.fn('AVG', Sequelize.col('unidade')), 'avgUnit'],
+            [Sequelize.fn('MONTH', Sequelize.col('createdAt')), 'month']
+          ],
+          group: ['month'],
+          raw: true,
+        });
+
+        monthlyData.forEach(data => {
+          const monthName = new Date(year, data.month - 1).toLocaleString('default', { month: 'long' });
+          if (!monthlyAverages[sensor.tipo]) {
+            monthlyAverages[sensor.tipo] = {};
+          }
+          monthlyAverages[sensor.tipo][monthName] = parseFloat(data.avgUnit.toFixed(2));
+        });
+      }
+
+      return monthlyAverages;
+    } catch (error) {
+      console.error("Erro ao calcular a média mensal por sensor para o ano:", error);
+      throw error;
+    }
+  }
+
+  async getDataBetweenDates(startDate, endDate) {
+    try {
+      const dados = await  DadoModel.findAll({
+        where: {
+          createdAt: {
+            [Op.between]: [startDate, endDate]
+          }
         },
-        order: [["timestamp", "DESC"]], // Opção para ordenar os dados pela data, do mais recente ao mais antigo
+        include: [{
+          model: SensorModel,
+          include: [{ // Include MicrocontroladorModel through SensorModel
+              model: MicrocontroladorModel
+          }]
+      }],
+        order: [['createdAt', 'ASC']], // Ordena os dados pela data, do mais antigo para o mais recente
       });
 
       return dados;
     } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-      throw error; // É uma boa prática propagar o erro para que o chamador possa tratá-lo
-    }
-  }
-
-  async getSensorIdById(sensorId) {
-    try {
-      // Converta a string para um número inteiro (int)
-      const id = parseInt(sensorId, 10);
-
-      const sensor = await this.SensorModel.findByPk(id);
-
-      if (sensor) {
-        return sensor.id;
-      } else {
-        console.error(`Sensor não encontrado com o ID: ${id}`);
-        return null;
-      }
-    } catch (error) {
-      console.error("Erro ao buscar o sensor:", error);
-      return null;
-    }
-  }
-
-  _convertData(parts) {
-    try {
-      if (parts.length >= 4) {
-        const [
-          temperaturaStr,
-          umidadeStr,
-          gas_inflamavelStr,
-          monoxido_carbonoStr,
-          sensorIdStr,
-        ] = parts;
-
-        // Converter as strings para os tipos apropriados
-        const temperatura = parseFloat(temperaturaStr);
-        const umidade = parseFloat(umidadeStr);
-        const gas_inflamavel = parseFloat(gas_inflamavelStr);
-        const monoxido_carbono = parseFloat(monoxido_carbonoStr);
-        const sensorId = parseInt(sensorIdStr, 10);
-
-        // Validar se os valores convertidos são válidos
-        if (
-          !isNaN(temperatura) &&
-          !isNaN(umidade) &&
-          !isNaN(gas_inflamavel) &&
-          !isNaN(monoxido_carbono) &&
-          !isNaN(sensorId)
-        ) {
-          return {
-            temperatura,
-            umidade,
-            gas_inflamavel,
-            monoxido_carbono,
-            sensorId,
-            timestamp,
-          };
-        } else {
-          console.error(
-            "Erro ao converter ou validar os dados: Valores inválidos."
-          );
-          return null;
-        }
-      } else {
-        console.error(
-          "Erro ao converter ou validar os dados: Número insuficiente de partes."
-        );
-        return null;
-      }
-    } catch (error) {
-      console.error("Erro ao converter os dados:", error);
-      return null;
+      console.error("Erro ao buscar dados entre as datas:", error);
+      throw error;
     }
   }
 }
+
+module.exports = new DataRepository();
