@@ -10,7 +10,7 @@ import {
   Legend
 } from '@syncfusion/ej2-react-charts';
 
-const ENDPOINT = "http://localhost:3001";
+const ENDPOINT = `${process.env.REACT_APP_API_URL}`;
 
 class RealTimeChart extends Component {
   constructor(props) {
