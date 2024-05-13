@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { TextField, Button, Grid, Container, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'
+import axios from 'axios';
+import ErrorComponent from './ErrorComponent'; // Importe o componente de erro personalizado
 
 const StyledContainer = styled(Container)({
   marginTop: '50px',
@@ -15,23 +16,23 @@ const StyledTextField = styled(TextField)({
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setError(null);
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/login`, {
         email,
         password
       });
 
-      // O Axios já processa a resposta JSON, então você pode acessar diretamente
       saveToken(response.data.token);
-
-      // Navegue para outra página após o login, se necessário
       navigate('/charts');
     } catch (error) {
       console.error('Login failed:', error.response?.data || error.message);
+      setError('Login falhou. Por favor, verifique suas credenciais e tente novamente.');
     }
   };
 
@@ -40,15 +41,16 @@ function LoginPage() {
   };
 
   const goToRegister = () => {
-    navigate('/register');  // Navega para a página de registro
+    navigate('/register');
   };
 
   const goToForgotPassword = () => {
-    navigate('/forgot-password'); // Navega para a página "Esqueci minha senha"
+    navigate('/forgot-password');
   };
 
   return (
     <StyledContainer maxWidth="xs">
+      {error && <ErrorComponent message={error} />} {/* Renderize o componente de erro se houver um erro */}
       <Typography variant="h4" align="center">Login</Typography>
       <Grid container spacing={3}>
         <Grid item xs={12}>
@@ -95,7 +97,7 @@ function LoginPage() {
             fullWidth
             variant="outlined"
             color="secondary"
-            onClick={goToForgotPassword}  // Adicione o evento aqui
+            onClick={goToForgotPassword}
           >
             Esqueceu a senha?
           </Button>
